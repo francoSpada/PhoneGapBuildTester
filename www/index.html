@@ -25,7 +25,7 @@ var h = 0;
 var timer;
 var updateStarted = false;
 var touches = [];
-
+var vertices = [];
 
 function update() {
 	if (updateStarted) return;
@@ -45,13 +45,13 @@ function update() {
 
 	ctx.clearRect(0, 0, w, h);
 
-	var vertices = [];
+	/*var vertices = [];
 	var len = touches.length;
 	for (var i=0; i<len; i++) {
 		var touch = touches[i];
 		var px = touch.pageX;
 		var py = touch.pageY;
-		vertices.push([px,py]);
+		vertices.push(new Punto(px,py));
 
 		ctx.beginPath();
 		ctx.arc(px, py, 5, 0, 2*Math.PI, true);
@@ -63,17 +63,31 @@ function update() {
 		ctx.strokeStyle = "rgba(0, 0, 200, 0.8)";
 		ctx.stroke();
 		console.log('drawn circle at ' + px +',' + py);
+	}*/
+
+	if(touches.length > 0){
+		var nuevaPos = new Punto(touches[0].pageX,touches[0].pageY);
+
+		if(vertices.length > 0){
+			if(distancia(nuevaPos,vertices[vertices.length-1]) > 1){
+				vertices.push(nuevaPos);
+			}
+		}else{
+			vertices.push(nuevaPos);
+		}	
 	}
 
-	ctx.beginPath();
-	ctx.moveTo(vertices[0][0],vertices[0][1]);
-	for(var i=1;i<len; i++){
-		ctx.lineTo(vertices[i][0],vertices[i][1]);
+	if(vertices.length > 1){
+		ctx.beginPath();
+		ctx.moveTo(vertices[0].x(),vertices[0].y());
+		for(var i=1;i<len; i++){
+			ctx.lineTo(vertices[i].x(),vertices[i].y());
+		}
+		ctx.closePath()
+		ctx.lineWidth = 0.8;
+		ctx.strokeStyle = "rgba(0, 0, 175, 1)";
+		ctx.stroke();
 	}
-	ctx.closePath()
-	ctx.lineWidth = 0.8;
-	ctx.strokeStyle = "rgba(0, 0, 175, 1)";
-	ctx.stroke();
 
 	updateStarted = false;
 }
@@ -81,33 +95,35 @@ function update() {
 function ol() {
 	canvas = document.getElementById('canvas');
 	ctx = canvas.getContext('2d');
-	//timer = setInterval(update, 15);
+	timer = setInterval(update, 15);
 
 canvas.addEventListener('touchend', function() {
 	ctx.clearRect(0, 0, w, h);
-	update();
 });
 
 canvas.addEventListener('touchmove', function(event) {
   event.preventDefault();
   touches = event.touches;
+  //update();
 });
 
 canvas.addEventListener('touchstart', function(event) {
   console.log('start');
+  vertices = [];
 });
 };
 
 </script>
 </head>
 <body onload="ol()">
-	
+
 <canvas id="canvas" width="300" height="300" style="top:0px; left:0px; width: 300px; height: 300px;"></canvas>
-<object id="tuio" type="application/x-tuio">Plugin FAILED to load</object>
+<object id="tuio" type="application/x-tuio">-</object>
 
 
 <script type="text/javascript" src="cordova.js"></script>
 <script type="text/javascript" src="js/index.js"></script>
+<script type="text/javascript" src="js/geom.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript">
 	app.initialize();
