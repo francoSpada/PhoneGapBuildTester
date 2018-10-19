@@ -27,6 +27,8 @@ var timer;
 var updateStarted = false;
 var touches = [];
 var vertices = [];
+var perimetro = "";
+var area = "";
 
 function update() {
 	if (updateStarted) return;
@@ -67,7 +69,7 @@ function update() {
 	}*/
 
 	if(touches.length > 0){
-		console.log(touches[0]);
+		//console.log(touches[0]);
 		var nuevaPos = new Punto(touches[0].pageX,touches[0].pageY);
 
 		if(vertices.length > 0){
@@ -77,7 +79,7 @@ function update() {
 		}else{
 			vertices.push(nuevaPos);
 		}
-		console.log(vertices[0]);
+		//console.log(vertices[0]);
 	}
 
 	if(vertices.length > 1){
@@ -92,16 +94,34 @@ function update() {
 		ctx.stroke();
 	}
 
+	if(perimetro != ""){
+		ctx.font = "16px Arial";
+		ctx.fillText("Perímetro: " + perimetro.toFixed(1)/10,10,20);
+	}
+	if(area != ""){
+		ctx.font = "16px Arial";
+		ctx.fillText("Área: " + area.toFixed(0)/(100),10,40);
+	}
+
 	updateStarted = false;
 }
 
 function ol() {
 	canvas = document.getElementById('canvas');
 	ctx = canvas.getContext('2d');
-	timer = setInterval(update, 15);
+	timer = setInterval(update, 50);
 
 	canvas.addEventListener('touchend', function() {
 		ctx.clearRect(0, 0, w, h);
+		perimetro = 0;
+		area = 0;
+		for(var v = 0; v < vertices.length-1; v++){
+			perimetro += distancia(vertices[v+1],vertices[v]);
+			area += (vertices[v+1].x*vertices[v].y-vertices[v+1].y*vertices[v].x)/2
+		}
+		perimetro += distancia(vertices[vertices.length-1],vertices[0]);
+		area += (vertices[0].x*vertices[vertices.length-1].y-vertices[0].y*vertices[vertices.length-1].x)/2			
+		console.log('end');
 	});
 
 	canvas.addEventListener('touchmove', function(event) {
@@ -115,6 +135,8 @@ function ol() {
 		console.log('start');
 		vertices = [];
 		touches = [];
+		perimetro = "";
+		area = "";
 	});
 };
 
