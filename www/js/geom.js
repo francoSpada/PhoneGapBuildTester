@@ -15,13 +15,6 @@ class Punto{
         return this.y
     }
 
-    lng(){
-        return this.x;
-    }
-
-    lat(){
-        return this.y
-    }
 }
 
 

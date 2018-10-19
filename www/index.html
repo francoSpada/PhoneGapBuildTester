@@ -15,6 +15,7 @@ body { margin: 0px; overflow: hidden; }
 canvas { border: 1px solid black; }
 </style>
 <script type="text/javascript" src="magictouch.js"></script>
+<script type="text/javascript" src="js/geom.js"></script>
 <script type="text/javascript">
 
 var canvas;
@@ -76,12 +77,12 @@ function update() {
 			vertices.push(nuevaPos);
 		}	
 	}
-
+	console.log(vertices[0]);
 	if(vertices.length > 1){
 		ctx.beginPath();
-		ctx.moveTo(vertices[0].x(),vertices[0].y());
-		for(var i=1;i<len; i++){
-			ctx.lineTo(vertices[i].x(),vertices[i].y());
+		ctx.moveTo(vertices[0].x,vertices[0].y);
+		for(var i=1;i<vertices.length; i++){
+			ctx.lineTo(vertices[i].x,vertices[i].y);
 		}
 		ctx.closePath()
 		ctx.lineWidth = 0.8;
@@ -123,7 +124,6 @@ canvas.addEventListener('touchstart', function(event) {
 
 <script type="text/javascript" src="cordova.js"></script>
 <script type="text/javascript" src="js/index.js"></script>
-<script type="text/javascript" src="js/geom.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript">
 	app.initialize();
