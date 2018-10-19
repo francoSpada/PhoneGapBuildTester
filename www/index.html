@@ -67,6 +67,7 @@ function update() {
 	}*/
 
 	if(touches.length > 0){
+		console.log(touches[0]);
 		var nuevaPos = new Punto(touches[0].pageX,touches[0].pageY);
 
 		if(vertices.length > 0){
@@ -75,9 +76,10 @@ function update() {
 			}
 		}else{
 			vertices.push(nuevaPos);
-		}	
+		}
+		console.log(vertices[0]);
 	}
-	console.log(vertices[0]);
+
 	if(vertices.length > 1){
 		ctx.beginPath();
 		ctx.moveTo(vertices[0].x,vertices[0].y);
@@ -98,20 +100,22 @@ function ol() {
 	ctx = canvas.getContext('2d');
 	timer = setInterval(update, 15);
 
-canvas.addEventListener('touchend', function() {
-	ctx.clearRect(0, 0, w, h);
-});
+	canvas.addEventListener('touchend', function() {
+		ctx.clearRect(0, 0, w, h);
+	});
 
-canvas.addEventListener('touchmove', function(event) {
-  event.preventDefault();
-  touches = event.touches;
-  //update();
-});
+	canvas.addEventListener('touchmove', function(event) {
+	event.preventDefault();
+	touches = event.touches;
+	console.log('move');
+	//update();
+	});
 
-canvas.addEventListener('touchstart', function(event) {
-  console.log('start');
-  vertices = [];
-});
+	canvas.addEventListener('touchstart', function(event) {
+		console.log('start');
+		vertices = [];
+		touches = [];
+	});
 };
 
 </script>
