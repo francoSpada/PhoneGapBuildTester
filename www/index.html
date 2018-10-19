@@ -45,14 +45,16 @@ function update() {
 
 	ctx.clearRect(0, 0, w, h);
 
-	var i, len = touches.length;
-	for (i=0; i<len; i++) {
+	var vertices = [];
+	var len = touches.length;
+	for (var i=0; i<len; i++) {
 		var touch = touches[i];
 		var px = touch.pageX;
 		var py = touch.pageY;
+		vertices.push([px,py]);
 
 		ctx.beginPath();
-		ctx.arc(px, py, 20, 0, 2*Math.PI, true);
+		ctx.arc(px, py, 5, 0, 2*Math.PI, true);
 
 		ctx.fillStyle = "rgba(0, 0, 200, 0.2)";
 		ctx.fill();
@@ -60,8 +62,18 @@ function update() {
 		ctx.lineWidth = 2.0;
 		ctx.strokeStyle = "rgba(0, 0, 200, 0.8)";
 		ctx.stroke();
-    	console.log('drawn circle at ' + px +',' + py);
+		console.log('drawn circle at ' + px +',' + py);
 	}
+
+	ctx.beginPath();
+	ctx.moveTo(vertices[0][0],vertices[0][1]);
+	for(var i=1;i<len; i++){
+		ctx.lineTo(vertices[i][0],vertices[i][1]);
+	}
+	ctx.closePath()
+	ctx.lineWidth = 0.8;
+	ctx.strokeStyle = "rgba(0, 0, 175, 1)";
+	ctx.stroke();
 
 	updateStarted = false;
 }
@@ -69,10 +81,11 @@ function update() {
 function ol() {
 	canvas = document.getElementById('canvas');
 	ctx = canvas.getContext('2d');
-	timer = setInterval(update, 15);
+	//timer = setInterval(update, 15);
 
 canvas.addEventListener('touchend', function() {
 	ctx.clearRect(0, 0, w, h);
+	update();
 });
 
 canvas.addEventListener('touchmove', function(event) {
