@@ -96,11 +96,11 @@ function update() {
 
 	if(perimetro != ""){
 		ctx.font = "16px Arial";
-		ctx.fillText("Perímetro: " + Number(perimetro/10).toFixed(2),10,20);
+		ctx.fillText("Perímetro: " + Number(Math.abs(perimetro/10)).toFixed(2),10,20);
 	}
 	if(area != ""){
 		ctx.font = "16px Arial";
-		ctx.fillText("Área: " + Number(area/100).toFixed(2),10,40);
+		ctx.fillText("Área: " + Number(Math.abs(area/100)).toFixed(2),10,40);
 	}
 
 	updateStarted = false;
