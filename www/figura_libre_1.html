@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>Touch Tracker Marker</title>
+	<meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+	<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <title>Hello World</title>
+<style type="text/css">
+body { margin: 0px; overflow: hidden; }
+canvas { border: 1px solid black; }
+</style>
+<script type="text/javascript" src="magictouch.js"></script>
+<script type="text/javascript" src="js/objetos_dibujo.js"></script>
+<script type="text/javascript" src="js/geom.js"></script>
+<script type="text/javascript">
+
+var canvas;
+var ctx;
+var w = 0;
+var h = 0;
+
+var timer;
+var updateStarted = false;
+var touches = [];
+var vertices = [];
+var perimetro = "";
+var area = "";
+
+function update() {
+	if (updateStarted) return;
+	updateStarted = true;
+
+	var nw = window.innerWidth;
+	var nh = window.innerHeight;
+
+	if ((w != nw) || (h != nh)) {
+		w = nw;
+		h = nh;
+		canvas.style.width = w+'px';
+		canvas.style.height = h+'px';
+		canvas.width = w;
+		canvas.height = h;
+	}
+
+	ctx.clearRect(0, 0, w, h);
+
+	/*var vertices = [];
+	var len = touches.length;
+	for (var i=0; i<len; i++) {
+		var touch = touches[i];
+		var px = touch.pageX;
+		var py = touch.pageY;
+		vertices.push(new Punto(px,py));
+
+		ctx.beginPath();
+		ctx.arc(px, py, 5, 0, 2*Math.PI, true);
+
+		ctx.fillStyle = "rgba(0, 0, 200, 0.2)";
+		ctx.fill();
+
+		ctx.lineWidth = 2.0;
+		ctx.strokeStyle = "rgba(0, 0, 200, 0.8)";
+		ctx.stroke();
+		console.log('drawn circle at ' + px +',' + py);
+	}*/
+
+	if(touches.length > 0){
+		//console.log(touches[0]);
+		var nuevaPos = new Punto(touches[0].pageX,touches[0].pageY);
+
+		if(vertices.length > 0){
+			if(distancia(nuevaPos,vertices[vertices.length-1]) > 1){
+				vertices.push(nuevaPos);
+			}
+		}else{
+			vertices.push(nuevaPos);
+		}
+		//console.log(vertices[0]);
+	}
+
+	if(vertices.length > 1){
+		ctx.beginPath();
+		ctx.moveTo(vertices[0].x,vertices[0].y);
+		for(var i=1;i<vertices.length; i++){
+			ctx.lineTo(vertices[i].x,vertices[i].y);
+		}
+		ctx.closePath()
+		ctx.lineWidth = 0.8;
+		ctx.strokeStyle = "rgba(0, 0, 175, 1)";
+		ctx.stroke();
+	}
+
+	if(perimetro != ""){
+		ctx.font = "16px Arial";
+		ctx.fillText("Perímetro: " + Number(Math.abs(perimetro/10)).toFixed(2),10,20);
+	}
+	if(area != ""){
+		ctx.font = "16px Arial";
+		ctx.fillText("Área: " + Number(Math.abs(area/100)).toFixed(2),10,40);
+	}
+
+	updateStarted = false;
+}
+
+function ol() {
+	canvas = document.getElementById('canvas');
+	ctx = canvas.getContext('2d');
+	timer = setInterval(update, 50);
+
+	canvas.addEventListener('touchend', function() {
+		ctx.clearRect(0, 0, w, h);
+		perimetro = 0;
+		area = 0;
+		for(var v = 0; v < vertices.length-1; v++){
+			perimetro += distancia(vertices[v+1],vertices[v]);
+			area += (vertices[v+1].x*vertices[v].y-vertices[v+1].y*vertices[v].x)/2
+		}
+		perimetro += distancia(vertices[vertices.length-1],vertices[0]);
+		area += (vertices[0].x*vertices[vertices.length-1].y-vertices[0].y*vertices[vertices.length-1].x)/2			
+		console.log('end');
+	});
+
+	canvas.addEventListener('touchmove', function(event) {
+	event.preventDefault();
+	touches = event.touches;
+	console.log('move');
+	//update();
+	});
+
+	canvas.addEventListener('touchstart', function(event) {
+		console.log('start');
+		vertices = [];
+		touches = [];
+		perimetro = "";
+		area = "";
+	});
+};
+
+</script>
+</head>
+<body onload="ol()">
+
+<canvas id="canvas" width="300" height="300" style="top:0px; left:0px; width: 300px; height: 300px;"></canvas>
+<object id="tuio" type="application/x-tuio">-</object>
+
+
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	app.initialize();
+</script>
+</body>
+</html>
