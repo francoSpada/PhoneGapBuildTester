@@ -9,6 +9,15 @@ class Punto{
     y(){
         return this.y
     }
+
+    vectorTo(p){
+        return(new Punto(p.x - this.x, p.y - this.y));
+    }
+}
+
+Punto.prototype.toString = function()
+{
+    return "x: " + this.x.toFixed(2) + ", y: " + this.y.toFixed(2) ;
 }
 
 class Grilla{
