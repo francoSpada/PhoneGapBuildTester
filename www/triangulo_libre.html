@@ -149,7 +149,10 @@ function ol() {
 
 	canvas.addEventListener('touchmove', function(event) {
 		event.preventDefault();
-		touches = event.touches;
+		var len = event.touches.length;
+		if(len >= 3){
+			touches = event.touches;
+		}		
 		console.log('move');
 		update();
 	});
