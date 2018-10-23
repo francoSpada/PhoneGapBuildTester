@@ -24,8 +24,12 @@ class Grilla{
     constructor(tam_grilla){
         this.tam_grilla = tam_grilla;
         //this.fillStyle = "rgba(0, 0, 200, 0.2)";
-        this.lineWidth = 0.4;
-		this.strokeStyle = "rgba(240, 240, 240, 1)";
+        this.lineWidth = 0.5;
+		this.strokeStyle = "rgba(200, 200, 200, 1)";
+    }
+
+    set_tam_grilla(new_tam){
+        this.tam_grilla = new_tam;
     }
 
     dibujar(wdw){

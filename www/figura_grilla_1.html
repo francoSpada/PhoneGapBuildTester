@@ -8,28 +8,32 @@
 	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
 	<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
     <link rel="stylesheet" type="text/css" href="css/index.css" />
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/popper.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
     <title>Hello World</title>
 <style type="text/css">
 body { margin: 0px; overflow: hidden; }
 canvas { border: 1px solid black; }
 </style>
-<script type="text/javascript" src="magictouch.js"></script>
 <script type="text/javascript" src="js/objetos_dibujo.js"></script>
 <script type="text/javascript" src="js/geom.js"></script>
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
 <script type="text/javascript">
 
 var canvas;
 var ctx;
+var gridData;
 var w = window.innerWidth;
 var h = window.innerHeight;
 var wdw = null;
 var grilla = null;
-var tam_grilla = w / 20;
+var tam_grilla = w / 10;
 
 var timer;
 var updateStarted = false;
-var touches = [];
 var vertices = [];
 var perimetro = "";
 var area = "";
@@ -42,60 +46,41 @@ function update() {
 	var nh = window.innerHeight;
 	if ((wdw.w != nw) || (wdw.h != nh)) {
 		wdw.w = nw;
-		wdw.h = nh;
+		wdw.h = nh - 30;
 		canvas.style.width = wdw.w+'px';
 		canvas.style.height = wdw.h+'px';
 		canvas.width = wdw.w;
 		canvas.height = wdw.h;
-	}
-	ctx.clearRect(0, 0, wdw.w, wdw.h);
-
-	grilla.dibujar(wdw);
-
-	/*var vertices = [];
-	var len = touches.length;
-	for (var i=0; i<len; i++) {
-		var touch = touches[i];
-		var px = touch.pageX;
-		var py = touch.pageY;
-		vertices.push(new Punto(px,py));
-
-		ctx.beginPath();
-		ctx.arc(px, py, 5, 0, 2*Math.PI, true);
-
-		ctx.fillStyle = "rgba(0, 0, 200, 0.2)";
-		ctx.fill();
-
-		ctx.lineWidth = 2.0;
-		ctx.strokeStyle = "rgba(0, 0, 200, 0.8)";
-		ctx.stroke();
-		console.log('drawn circle at ' + px +',' + py);
-	}*/
-
-	if(touches.length > 0){
-		//console.log(touches[0]);
-		var nuevaPos = new Punto(touches[0].pageX,touches[0].pageY);
-
-		if(vertices.length > 0){
-			if(distancia(nuevaPos,vertices[vertices.length-1]) > 1){
-				vertices.push(nuevaPos);
-			}
-		}else{
-			vertices.push(nuevaPos);
-		}
-		//console.log(vertices[0]);
+		ctx.clearRect(0, 0, wdw.w, wdw.h);
+		grilla.dibujar(wdw);
+		gridData = ctx.getImageData(0,0, wdw.w, wdw.h);
 	}
 
-	if(vertices.length > 1){
+	ctx.putImageData(gridData, 0, 0);
+
+	//grilla.dibujar(wdw);
+
+	if(vertices.length >= 1){
 		ctx.beginPath();
 		ctx.moveTo(vertices[0].x,vertices[0].y);
 		for(var i=1;i<vertices.length; i++){
 			ctx.lineTo(vertices[i].x,vertices[i].y);
 		}
 		ctx.closePath()
+		ctx.fillStyle = "rgba(0, 0, 200, 0.2)";
+		ctx.fill();
 		ctx.lineWidth = 0.8;
 		ctx.strokeStyle = "rgba(0, 0, 175, 1)";
 		ctx.stroke();
+		for(var i=0;i<vertices.length; i++){
+			ctx.beginPath();
+			ctx.moveTo(vertices[i].x-5,vertices[i].y-5);
+			ctx.lineTo(vertices[i].x-5,vertices[i].y+5);
+			ctx.lineTo(vertices[i].x+5,vertices[i].y+5);
+			ctx.lineTo(vertices[i].x+5,vertices[i].y-5);
+			ctx.closePath();
+			ctx.stroke();
+		}
 	}
 
 	if(perimetro != ""){
@@ -120,46 +105,39 @@ function ol() {
 	grilla = new Grilla(tam_grilla);
 
 	canvas.addEventListener('touchend', function() {
-		//ctx.clearRect(0, 0, w, h);
-		perimetro = 0;
-		area = 0;
-		for(var v = 0; v < vertices.length-1; v++){
-			perimetro += distancia(vertices[v+1],vertices[v]);
-			area += (vertices[v+1].x*vertices[v].y-vertices[v+1].y*vertices[v].x)/2
-		}
-		perimetro += distancia(vertices[vertices.length-1],vertices[0]);
-		area += (vertices[0].x*vertices[vertices.length-1].y-vertices[0].y*vertices[vertices.length-1].x)/2			
-		console.log('end');
-		update();
 	});
 
 	canvas.addEventListener('touchmove', function(event) {
 		event.preventDefault();
-		touches = event.touches;
-		console.log('move');
-		update();
 	});
 
 	canvas.addEventListener('touchstart', function(event) {
-		console.log('start');
-		vertices = [];
-		touches = [];
-		perimetro = "";
-		area = "";
+
 	});
 
 	canvas.addEventListener('click', function(event) {
-		console.log('start');
-		console.log(event);
 		p = grilla.punto_mas_cercano(new Punto(event.pageX,event.pageY));
-		console.log(p.x);
-		console.log(p.y);
-		vertices = [new Punto(p.x-5,p.y-5),new Punto(p.x+5,p.y-5),new Punto(p.x+5,p.y+5),new Punto(p.x-5,p.y+5)];
-		touches = [];
+		vertices.push(new Punto(p.x,p.y));
+		//vertices = [new Punto(p.x-5,p.y-5),new Punto(p.x+5,p.y-5),new Punto(p.x+5,p.y+5),new Punto(p.x-5,p.y+5)];
 		perimetro = "";
 		area = "";
 		update();
 	});
+
+	document.getElementById("gridRange").addEventListener('change', function (e){
+		grilla.set_tam_grilla(parseFloat(e.target.value));
+		ctx.clearRect(0, 0, wdw.w, wdw.h);
+		grilla.dibujar(wdw);
+		gridData = ctx.getImageData(0,0, wdw.w, wdw.h);
+		update();
+	});
+
+	document.getElementById("limpiar-opt").addEventListener('click', function (e){
+		vertices = [];
+		update();
+	});
+
+	
 
 	update();
 };
@@ -168,13 +146,34 @@ function ol() {
 </head>
 <body onload="ol()">
 
+	<nav class="navbar bg-dark navbar-dark" style="position:absolute;bottom:0px;width:100%;">
+		<!-- Brand -->
+		<a class="navbar-brand" href="#">Figuras y áreas</a>
+	  
+		<!-- Toggler/collapsibe Button -->
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+		  <span class="navbar-toggler-icon"></span>
+		</button>
+	  
+		<!-- Navbar links -->
+		<div class="collapse navbar-collapse" id="collapsibleNavbar">
+		  <ul class="navbar-nav">
+			<li class="nav-item">
+				<label class="nav-link" style="line-height: 3px">Grilla: <input type="range" min="10" max="100" value="20" class="slider" id="gridRange" style="margin:0px 0px 0px 20px;"> </label>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#" id="limpiar-opt">Limpiar</a>
+			</li>
+			<li class="nav-item">
+			  <a class="nav-link" href="index.html">Volver</a>
+			</li>
+		  </ul>
+		</div>
+	</nav> 
 <canvas id="canvas" width="300" height="300" style="top:0px; left:0px; width: 300px; height: 300px;"></canvas>
+
 <object id="tuio" type="application/x-tuio">-</object>
 
-
-<script type="text/javascript" src="cordova.js"></script>
-<script type="text/javascript" src="js/index.js"></script>
-<script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript">
 	app.initialize();
 </script>
