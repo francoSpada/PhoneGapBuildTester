@@ -63,16 +63,14 @@ function update() {
 			var py = touch.pageY;
 			vertices.push(new Punto(px,py));
 
-			ctx.beginPath();
-			ctx.arc(px, py, 20, 0, 2*Math.PI, true);
-
 			ctx.fillStyle = "rgba(0, 0, 200, 0.2)";
-			ctx.fill();
-
 			ctx.lineWidth = 2.0;
 			ctx.strokeStyle = "rgba(0, 0, 200, 0.8)";
+			ctx.beginPath();
+			ctx.arc(px, py, 10, 0, 2*Math.PI, true);
+			ctx.fill();
 			ctx.stroke();
-			console.log('drawn circle at ' + px +',' + py);
+			ctx.closePath();
 		}
 	}
 
@@ -82,13 +80,38 @@ function update() {
 	Vertice 2 -> C
 	*/
 	if(len == 3){
+
+		var AB = distancia(vertices[0],vertices[1]);
+		var AC = distancia(vertices[0],vertices[2]);
+		var BC = distancia(vertices[1],vertices[2]);
+
+		var incentro = new Punto((BC*vertices[0].x+AC*vertices[1].x+AB*vertices[2].x)/(AB+AC+BC),
+								(BC*vertices[0].y+AC*vertices[1].y+AB*vertices[2].y)/(AB+AC+BC))
+
 		var vAB = vertices[0].vectorTo(vertices[1]);
 		var vAC = vertices[0].vectorTo(vertices[2]);
 		var vBA = vertices[1].vectorTo(vertices[0]);
 		var vBC = vertices[1].vectorTo(vertices[2]);
 		var vCB = vertices[2].vectorTo(vertices[1]);
 		var vCA = vertices[2].vectorTo(vertices[0]);
+		var vIA = incentro.vectorTo(vertices[0]);
+		var vIB = incentro.vectorTo(vertices[1]);
+		var vIC = incentro.vectorTo(vertices[2]);
 
+		ctx.strokeStyle = "rgba(180, 0, 0, 0.8)";
+		//Bisectrices
+		/*ctx.beginPath();
+		ctx.moveTo(vertices[0].x,vertices[0].y);
+		ctx.lineTo(incentro.x,incentro.y);
+		ctx.stroke();
+		ctx.moveTo(vertices[1].x,vertices[1].y);
+		ctx.lineTo(incentro.x,incentro.y);
+		ctx.stroke();
+		ctx.moveTo(vertices[2].x,vertices[2].y);
+		ctx.lineTo(incentro.x,incentro.y);
+		ctx.stroke();*/
+
+		//Triángulo
 		ctx.fillStyle = "rgba(0, 0, 200, 0.2)";
 		ctx.lineWidth = 1.0;
 		ctx.strokeStyle = "rgba(0, 0, 200, 0.8)";
@@ -100,21 +123,24 @@ function update() {
 		ctx.fill();
 		ctx.stroke();
 
-		ctx.font = "32px Arial";
+		ctx.font = "26px Arial";
 		ctx.lineWidth = 1.0;
 		ctx.fillStyle = "rgba(200, 0, 0, 1)";
-		ctx.fillText("A: " + angulo_entre_vectores(vAB,vAC).toFixed(2),vertices[0].x,vertices[0].y+60);
-		ctx.fillText("B: " + angulo_entre_vectores(vBA,vBC).toFixed(2),vertices[1].x,vertices[1].y+60);
-		ctx.fillText("C: " + angulo_entre_vectores(vCB,vCA).toFixed(2),vertices[2].x,vertices[2].y+60);
-		/*ctx.fillText("A",vertices[0].x,vertices[0].y+60);
-		ctx.fillText("B",vertices[1].x,vertices[1].y+60);
-		ctx.fillText("C",vertices[2].x,vertices[2].y+60);
-		ctx.fillText("A: " + vertices[0].toString(),10,10);
-		ctx.fillText("B: " + vertices[1].toString(),10,30);
-		ctx.fillText("C: " + vertices[2].toString(),10,50);
-		ctx.fillText("vAB: " + vAB.toString(),10,70);
-		ctx.fillText("vAC: " + vAC.toString(),10,90);
-		ctx.fillText("ang: " + angulo_entre_vectores(vAB,vAC).toFixed(2),10,110);*/
+		var posTextA = vertices[0].pointPlus(vIA.newNorm(75));
+		var posTextB = vertices[1].pointPlus(vIB.newNorm(75));
+		var posTextC = vertices[2].pointPlus(vIC.newNorm(75));
+		ctx.fillText("A: " + angulo_entre_vectores(vAB,vAC).toFixed(2),posTextA.x,posTextA.y);
+		ctx.fillText("B: " + angulo_entre_vectores(vBA,vBC).toFixed(2),posTextB.x,posTextB.y);
+		ctx.fillText("C: " + angulo_entre_vectores(vCB,vCA).toFixed(2),posTextC.x,posTextC.y);
+		//ctx.fillText("A",vertices[0].x,vertices[0].y+60);
+		//ctx.fillText("B",vertices[1].x,vertices[1].y+60);
+		//ctx.fillText("C",vertices[2].x,vertices[2].y+60);
+		//ctx.fillText("A: " + vertices[0].toString(),10,10);
+		//ctx.fillText("B: " + vertices[1].toString(),10,30);
+		//ctx.fillText("C: " + vertices[2].toString(),10,50);
+		//ctx.fillText("vAB: " + vAB.toString(),10,70);
+		//ctx.fillText("vAC: " + vAC.toString(),10,90);
+		//ctx.fillText("ang: " + angulo_entre_vectores(vAB,vAC).toFixed(2),10,110);
 	}
 
 	if(perimetro != ""){
@@ -142,8 +168,7 @@ function ol() {
 			area += (vertices[v+1].x*vertices[v].y-vertices[v+1].y*vertices[v].x)/2
 		}
 		perimetro += distancia(vertices[vertices.length-1],vertices[0]);
-		area += (vertices[0].x*vertices[vertices.length-1].y-vertices[0].y*vertices[vertices.length-1].x)/2  */			
-		console.log('end');
+		area += (vertices[0].x*vertices[vertices.length-1].y-vertices[0].y*vertices[vertices.length-1].x)/2  */
 		update();
 	});
 
@@ -152,17 +177,16 @@ function ol() {
 		var len = event.touches.length;
 		if(len >= 3){
 			touches = event.touches;
+			update();
 		}		
-		console.log('move');
-		update();
+
 	});
 
 	canvas.addEventListener('touchstart', function(event) {
-		console.log('start');
 		//touches = [];
 		perimetro = "";
 		area = "";
-		update();
+		//update();
 	});
 
 	update();

@@ -13,6 +13,15 @@ class Punto{
     vectorTo(p){
         return(new Punto(p.x - this.x, p.y - this.y));
     }
+
+    pointPlus(p){
+        return(new Punto(p.x + this.x, p.y + this.y));
+    }
+
+    newNorm(new_norm){
+        var norm = Math.sqrt(this.x*this.x+this.y*this.y);
+        return(new Punto(new_norm*this.x/norm, new_norm*this.y/norm));
+    }
 }
 
 Punto.prototype.toString = function()
