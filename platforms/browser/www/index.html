@@ -40,35 +40,45 @@
 
     <link rel="stylesheet" type="text/css" href="css/index.css" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/popper.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
     <title>Hello World</title>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-sm bg-light">
-
+    <nav class="navbar bg-dark navbar-dark" style="position:absolute;bottom:0px;width:100%;">
+		<!-- Brand -->
+		<a class="navbar-brand" href="#">Matemáticas Berta</a>
+	  
+		<!-- Toggler/collapsibe Button -->
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+		  <span class="navbar-toggler-icon">&#9776;</span>
+		</button>
+	  
+		<!-- Navbar links -->
+		<div class="collapse navbar-collapse" id="collapsibleNavbar">
         <!-- Links -->
         <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link 1</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link 2</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link 3</a>
-          </li>
-        </ul>
-      
-    </nav>
+            <li class="nav-item">
+              <a class="nav-link" href="figura_libre_1.html">Figura libre</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="figura_grilla_1.html">Figura grilla</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="triangulo_libre.html">Triángulo libre</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="figuras_grilla_movible.html">Figuras</a>
+            </li>
+          </ul>
+		</div>
+	</nav> 
 
-    <div style="width: 100%">
-        <button style="margin: 100px" type="button" class="btn btn-outline-primary">Soy un botón</button>
-    </div>
-
-    <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript">
         app.initialize();
     </script>

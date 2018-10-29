@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>Touch Tracker Marker</title>
+	<meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+	<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/popper.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <title>Hello World</title>
+<style type="text/css">
+body { margin: 0px; overflow: hidden; }
+canvas { border: 1px solid black; }
+</style>
+<script type="text/javascript" src="js/objetos_dibujo.js"></script>
+<script type="text/javascript" src="js/geom.js"></script>
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+<script type="text/javascript">
+
+var canvas;
+var ctx;
+var gridData;
+var w = window.innerWidth;
+var h = window.innerHeight;
+var wdw = null;
+var grilla = null;
+var tam_grilla = w / 10;
+
+var timer;
+var updateStarted = false;
+var vertices = [];
+var figuras = [];
+var perimetro = "";
+var area = "";
+var punto_inicial_drag = null;
+
+
+function update() {
+	if (updateStarted) return;
+	updateStarted = true;
+	var nw = window.innerWidth;
+	var nh = window.innerHeight;
+	if ((wdw.w != nw) || (wdw.h != nh)) {
+		wdw.w = nw;
+		wdw.h = nh - 30;
+		canvas.style.width = wdw.w+'px';
+		canvas.style.height = wdw.h+'px';
+		canvas.width = wdw.w;
+		canvas.height = wdw.h;
+		ctx.clearRect(0, 0, wdw.w, wdw.h);
+		grilla.dibujar(wdw);
+		gridData = ctx.getImageData(0,0, wdw.w, wdw.h);
+	}
+
+	ctx.putImageData(gridData, 0, 0);
+
+	//grilla.dibujar(wdw);
+
+	if(vertices.length >= 1){
+		ctx.beginPath();
+		ctx.moveTo(vertices[0].x,vertices[0].y);
+		for(var i=1;i<vertices.length; i++){
+			ctx.lineTo(vertices[i].x,vertices[i].y);
+		}
+		ctx.closePath()
+		ctx.fillStyle = "rgba(0, 0, 200, 0.2)";
+		ctx.fill();
+		ctx.lineWidth = 0.8;
+		ctx.strokeStyle = "rgba(0, 0, 175, 1)";
+		ctx.stroke();
+		for(var i=0;i<vertices.length; i++){
+			ctx.beginPath();
+			ctx.moveTo(vertices[i].x-5,vertices[i].y-5);
+			ctx.lineTo(vertices[i].x-5,vertices[i].y+5);
+			ctx.lineTo(vertices[i].x+5,vertices[i].y+5);
+			ctx.lineTo(vertices[i].x+5,vertices[i].y-5);
+			ctx.closePath();
+			ctx.stroke();
+		}
+	}
+
+	for(f in figuras){
+		figuras[f].dibujar(ctx);
+	}
+
+	if(perimetro != ""){
+		ctx.font = "16px Arial";
+		ctx.fillText("Perímetro: " + Number(Math.abs(perimetro/10)).toFixed(2),10,20);
+	}
+	if(area != ""){
+		ctx.font = "16px Arial";
+		ctx.fillText("Área: " + Number(Math.abs(area/100)).toFixed(2),10,40);
+	}
+
+	updateStarted = false;
+}
+
+function validarVertices(vertices){
+	return true;
+}
+
+function ol() {
+	canvas = document.getElementById('canvas');
+	ctx = canvas.getContext('2d');
+	wdw = new Object({'ctx': ctx, 'w': 0, 'h': 0});
+
+	//timer = setInterval(update, 100);
+	
+	grilla = new Grilla(tam_grilla);
+
+	canvas.addEventListener('touchend', function(event) {
+		if(punto_inicial_drag != null){
+			for(f in figuras){
+				if(figuras[f].seleccionada){
+					figuras[f].desplazar(punto_inicial_drag.vectorTo(punto_final_drag));
+					figuras[f].seleccionada = false;
+					update();
+					break;
+				}
+			}
+		}
+		punto_inicial_drag = null;
+
+	});
+
+	canvas.addEventListener('touchmove', function(event) {
+		event.preventDefault();
+		var p = new Punto(event.touches[0].pageX,event.touches[0].pageY);
+		punto_final_drag = grilla.punto_mas_cercano(p);
+		//update();
+	});
+
+	canvas.addEventListener('touchstart', function(event) {
+		var p = new Punto(event.touches[0].pageX,event.touches[0].pageY);
+		punto_inicial_drag = grilla.punto_mas_cercano(p);
+		for(f in figuras){
+			//console.log(f + " " + figuras[f].punto_es_interior(punto_inicial_drag));
+			if(figuras[f].punto_es_interior(p)){
+				figuras[f].seleccionada = true;
+				break;
+			}
+		}
+	});
+
+	canvas.addEventListener('click', function(event) {
+		var p = grilla.punto_mas_cercano(new Punto(event.pageX,event.pageY));
+		nv = new Punto(p.x,p.y);
+		if(vertices.length > 2 && nv.esIgualA(vertices[0])){
+			if(validarVertices(vertices)){
+				figuras.push(new Figura_Grilla(vertices));
+			}
+			vertices = [];
+		}else{
+			vertices.push(nv);
+		}
+		
+		//vertices = [new Punto(p.x-5,p.y-5),new Punto(p.x+5,p.y-5),new Punto(p.x+5,p.y+5),new Punto(p.x-5,p.y+5)];
+		perimetro = "";
+		area = "";
+		update();
+	});
+
+	document.getElementById("gridRange").addEventListener('change', function (e){
+		grilla.set_tam_grilla(parseFloat(e.target.value));
+		ctx.clearRect(0, 0, wdw.w, wdw.h);
+		grilla.dibujar(wdw);
+		gridData = ctx.getImageData(0,0, wdw.w, wdw.h);
+		update();
+	});
+
+	document.getElementById("limpiar-opt").addEventListener('click', function (e){
+		vertices = [];
+		update();
+	});
+
+	
+
+	update();
+};
+
+</script>
+</head>
+<body onload="ol()">
+
+	<nav class="navbar bg-dark navbar-dark" style="position:absolute;bottom:0px;width:100%;">
+		<!-- Brand -->
+		<a class="navbar-brand" href="#">Figuras y áreas</a>
+	  
+		<!-- Toggler/collapsibe Button -->
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+		  <span class="navbar-toggler-icon" style="">&#9776;</span>
+		</button>
+	  
+		<!-- Navbar links -->
+		<div class="collapse navbar-collapse" id="collapsibleNavbar">
+		  <ul class="navbar-nav">
+			<li class="nav-item">
+				<label class="nav-link" style="line-height: 3px">Grilla: <input type="range" min="10" max="100" value="20" class="slider" id="gridRange" style="margin:0px 0px 0px 20px;"> </label>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#" id="limpiar-opt">Limpiar</a>
+			</li>
+			<li class="nav-item">
+			  <a class="nav-link" href="index.html">Volver</a>
+			</li>
+		  </ul>
+		</div>
+	</nav> 
+<canvas id="canvas" width="300" height="300" style="top:0px; left:0px; width: 300px; height: 300px;"></canvas>
+
+<object id="tuio" type="application/x-tuio">-</object>
+
+<script type="text/javascript">
+	app.initialize();
+</script>
+</body>
+</html>
