@@ -17,13 +17,14 @@ function angulo_entre_vectores(v1,v2){
 function interseccion_recta_con_horizontal(pr,p1,p2){
     //pr punto de referencia
     //p1 y p2 puntos de la recta
+    console.log(pr);
+    console.log(p1);
+    console.log(p2);
     if( (p1.y > pr.y && p2.y > pr.y) || (p1.y < pr.y && p2.y < pr.y) ){
-        console.log("a");
         return false;
     }else if(p1.x > pr.x && p2.x > pr.x){
         return true;
     }else if(p1.x < pr.x && p2.x < pr.x){
-        console.log("b");
         return false;
     }else{
         if(p1.x < p2.x){
@@ -49,6 +50,9 @@ function punto_dentro_de_vertices(p,vertices){
         if(interseccion_recta_con_horizontal(p,vertices[v-1],vertices[v])){
             cuenta_intersecciones += 1;
         }
+    }
+    if(interseccion_recta_con_horizontal(p,vertices[v-1],vertices[0])){
+        cuenta_intersecciones += 1;
     }
     if(cuenta_intersecciones % 2 == 0){
         return false;
